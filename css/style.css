@@ -1,18 +1,29 @@
-table tr td{
-    width: 15px;
-    height: 15px;
-    background-color: rgb(230, 230, 241);
-    border: 1px solid black;
+table tr td {
+  width: 15px;
+  height: 15px;
+  border: 1px solid black;
+}
+table td:hover {
+  background-color: chocolate;
+}
+.inicio {
+  background-color: red;
 }
 
-.bgBlack{
-    background-color: black;
-}
- 
-.bgBlue{
-    background-color: blue;
+.obstaculo {
+  background-color: black;
 }
 
-.bgGreen{
-    background-color: green;
+.agua {
+  background-color: blue;
+}
+
+.pasto {
+  background-color: green;
+}
+.libre {
+  background-color: white;
+}
+.final {
+  background-color: #ff9933;
 }
