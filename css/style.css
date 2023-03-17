@@ -1,0 +1,18 @@
+table tr td{
+    width: 15px;
+    height: 15px;
+    background-color: rgb(230, 230, 241);
+    border: 1px solid black;
+}
+
+.bgBlack{
+    background-color: black;
+}
+ 
+.bgBlue{
+    background-color: blue;
+}
+
+.bgGreen{
+    background-color: green;
+}
