@@ -164,10 +164,10 @@ pre span.key {
 	background-color: #FF703F;
 }
 .grid_item.active {
-	background-color: #FF703F;
+	background-color: blueviolet;
 }
 .grid_item.finish {
-
+  background-color: red;
 }
 #weightsKey {
   display: none;

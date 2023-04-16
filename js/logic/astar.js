@@ -268,10 +268,10 @@
     // Take diagonal weight into consideration.
     //DENTRO DE LA CONDICION OBTIENE EL COSTO EN DIAGONAL
     if (fromNeighbor && fromNeighbor.x != this.x && fromNeighbor.y != this.y) {
-      return this.weight * 14;
+      return this.weight + 14;
     }
     //OBTIENE EL COSTO EN LATERALES
-    return this.weight * 10;
+    return this.weight + 10;
   };
   
   GridNode.prototype.isWall = function() {
