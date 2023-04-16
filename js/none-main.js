@@ -1,5 +1,6 @@
+
 cFinal = null;
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", (e) => {
   crearCuadricula();
   //ROJO
   arrInicio = [1];
@@ -21,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
   //VERDE
   arrPasto = [
     35, 82, 107, 132, 137, 138, 139, 140, 141, 166, 191, 216, 241, 357, 383,
-    399, 400, 409, 435, 436, 462, 524, 525, 549, 550, 575, 612
+    399, 400, 409, 435, 436, 462, 524, 525, 549, 550, 575, 612,
   ];
 
   pintarObstaculos(arrInicio, arrObstaculos, arrAgua, arrPasto);
@@ -64,7 +65,7 @@ function handlerElegirCuadro() {
     element.addEventListener("click", function () {
       if (cFinal == null) {
         element.classList.replace(element.className, "final");
-        cFinal = parseInt((element.id).replace("c", ""));
+        cFinal = parseInt(element.id.replace("c", ""));
         console.log(cFinal);
       } else {
         console.log("Ya esta seleccionado");
