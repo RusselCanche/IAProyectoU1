@@ -1,185 +1,187 @@
-/* global Graph, astar, $ */
+
+// FUNCIÓN ANÓNIMA PARA LAS PROPIEDADES DE LA CUADRÍCULA
 $(function () {
-  var $grid = $("#search_grid");
-
-  var opts = {
-    wallFrequency: 0.1,
-    gridSize: 25,
-    debug: true,
-    diagonal: true,
-    closest: false,
+  var $cuadricula = $("#search_grid");
+  var opciones = {
+    gridSize: 25, // tamaño de cuadricula (25x25)
+    debug: true, // visualizacion de datos (F,G,H) en cuadricula
+    diagonal: true, // Si el camino puede ir en diagonal
   };
-  //NO MOVERLE XD
-  var grid = new GraphSearch($grid, opts, astar.search);
-  grid.initialize();
-  grid.setOption({ diagonal: true });
-  grid.graph.diagonal = true;
+  // Definir la CLASE BusquedaGrafica con las propiedades establecidas, astar hace referencia a otro archivo
+  var grid = new BusquedaGrafica($cuadricula, opciones, astar.search);
+  grid.initialize(); // inicializamos los valores que tenemos para graficar
+  grid.graph.diagonal = true; // el camino se va en diagonal
 });
-
-var css = { start: "start", finish: "finish", wall: "wall", active: "active" };
-function GraphSearch($graph, options, implementation) {
-  this.$graph = $graph;
-  this.search = implementation;
-  this.opts = $.extend(
-    { wallFrequency: 0.1, debug: true, gridSize: 25 },
-    options
-  );
+// preparamos el css en los valores que tendrá por defecto
+var css = { start: "start", finish: "finish", wall: "wall", active: "active" }; 
+// Definimos el constructor de la clase, para inicializarla con los valores correspondientes
+function BusquedaGrafica($grafica, opciones, implementacion) {
+  this.$grafica = $grafica;
+  this.search = implementacion;
+  this.opciones = $.extend({ debug: true, gridSize: 25 }, opciones); // recibe los parametros d elas opciones 
   this.initialize();
 }
-GraphSearch.prototype.setOption = function (opt) {
-  this.opts = $.extend(this.opts, opt);
-  this.drawDebugInfo();
+//agrega las opciones de los datos de celdas
+BusquedaGrafica.prototype.setOption = function (opt) {
+  this.opciones = $.extend(this.opciones, opt);
+  this.drawDebugInfo(); // dibuja las opciones que le habiamos mandado
 };
-GraphSearch.prototype.initialize = function () {
+
+// método anónimo para inicializar desde cero, por defecto
+BusquedaGrafica.prototype.initialize = function () {
   this.grid = [];
-  var self = this,
-    nodes = [],
-    $graph = this.$graph;
+  var self = this, nodos = [], $grafica = this.$grafica;
+  $grafica.empty();
 
-  $graph.empty();
-
-  var cellWidth = $graph.width() / this.opts.gridSize - 2, // -2 for border
-    cellHeight = $graph.height() / this.opts.gridSize - 2,
-    $cellTemplate = $("<span />")
-      .addClass("grid_item")
-      .width(cellWidth)
-      .height(cellHeight),
-    startSet = false;
+  var largoCelda = $grafica.width() / this.opciones.gridSize - 2,
+      altoCelda = $grafica.height() / this.opciones.gridSize - 2,
+      $plantillaCelda = $("<span />")
+        .addClass("grid_item")
+        .width(largoCelda)
+        .height(altoCelda),
+    tieneInicio = false;
   var conteo = 0;
-  for (var x = 0; x < this.opts.gridSize; x++) {
-    var $row = $("<div class='clear' />"),
-      nodeRow = [],
-      gridRow = [];
+  
+  // va ir generando la cuadrícula en fila (horizontal)
+    for (var x = 0; x < this.opciones.gridSize; x++) {
+    var $fila = $("<div class='clear' />"),
+      nodoFila = [], // agrega los nodos correspondientes
+      cuadriculaFila = [];
 
-    for (var y = 0; y < this.opts.gridSize; y++) {
-      var id = "cell_" + x + "_" + y,
-        $cell = $cellTemplate.clone();
-      $cell.attr("id", id).attr("x", x).attr("y", y);
-      $row.append($cell);
-      gridRow.push($cell);
-      //TODO: Agregar demas arrays de obstaculos
+       // genera las cuadrículas de manera vertical
+    for (var y = 0; y < this.opciones.gridSize; y++) {
+      var id = "cell_" + x + "_" + y, $celda = $plantillaCelda.clone();
+      $celda.attr("id", id).attr("x", x).attr("y", y);
+      $fila.append($celda);
+      cuadriculaFila.push($celda);
 
+      // Pintar obstaculos: Pared, agua, pasto 
       if (arrObstaculos.includes(conteo)) {
-        nodeRow.push(PARED);
-        $cell.addClass(css.wall);
+        nodoFila.push(PARED);
+        $celda.addClass(css.wall);
       } else {
-        var cell_weight = null;
+        var costoCelda = null;
         if (arrAgua.includes(conteo)) {
-          cell_weight = AGUA;
+          costoCelda = AGUA;
         }
         if (arrPasto.includes(conteo)) {
-          cell_weight = PASTO;
+          costoCelda = PASTO;
         }
-        //TODO: Checar los costos de celda
-        nodeRow.push(cell_weight);
-        $cell.addClass("weight" + cell_weight);
-        //TODO: PENDIENTE INICIALIZAR VISUALIZACION DEL COSTO
-        if ($("#displayWeights").prop("checked")) {
-          console.log(`cell_weight: ${cell_weight}`);
-        }
+        
+        // agregamos los costos al arreglo y agregamos estilo a las celdas
+        nodoFila.push(costoCelda);
+        $celda.addClass("weight" + costoCelda);
+        
         //SE INICIA AL PRINCIPIO DE LA MATRIZ
-        if (!startSet) {
-          $cell.addClass(css.start);
-          startSet = true;
+        if (!tieneInicio) {
+          $celda.addClass(css.start);
+          tieneInicio = true;
         }
       }
-      conteo++;
+      conteo++; // controla el conteo de las celdas
     }
-    $graph.append($row);
 
-    this.grid.push(gridRow);
-    nodes.push(nodeRow);
+    $grafica.append($fila);
+    this.grid.push(cuadriculaFila);
+    nodos.push(nodoFila);
   }
+  //grafica todos los nodos ()
+  this.graph = new Graph(nodos);
 
-  this.graph = new Graph(nodes);
-
-  // bind cell event, set start/wall positions
-  this.$cells = $graph.find(".grid_item");
-  this.$cells.click(function () {
+  // se busca entre todas las celdas para darle el evento al momento que se cliclea la celda y se asa el parametro de la celda
+  
+  // Buscar todas las celdas de la cuadricula y agregar el evento click en cada una.
+  this.$celdas = $grafica.find(".grid_item");
+  this.$celdas.click(function () {
     self.cellClicked($(this));
   });
 };
-GraphSearch.prototype.cellClicked = function ($end) {
-  var end = this.nodeFromElement($end);
-  if ($end.hasClass(css.wall) || $end.hasClass(css.start)) {
+BusquedaGrafica.prototype.cellClicked = function ($fin) {
+  var fin = this.nodeFromElement($fin);
+
+  //Verificar que la celda seleccionada, no sea el inicio o un obstaculo pared
+  if ($fin.hasClass(css.wall) || $fin.hasClass(css.start)) {
     return;
   }
 
-  this.$cells.removeClass(css.active); //QUITAR CUADROS ACTIVOS DE RUTA
-  this.$cells.removeClass(css.finish);
-  $end.addClass("finish");
-  var $start = this.$cells.filter("." + css.start),
-    start = this.nodeFromElement($start);
+  //Limpieza visual de los nodos para antes de la animacion de la solucion
+  this.$celdas.removeClass(css.active);
+  this.$celdas.removeClass(css.finish);
+  $fin.addClass("finish");
 
-  var sTime = performance ? performance.now() : new Date().getTime();
+  var $inicio = this.$celdas.filter("." + css.start),
+    inicio = this.nodeFromElement($inicio);
 
-  var path = this.search(this.graph, start, end, {
-    closest: this.opts.closest,
+  //var sTime = performance ? performance.now() : new Date().getTime();
+
+  // te otorga los nodos de la solución 
+  var ruta = this.search(this.graph, inicio, fin, {
+    closest: this.opciones.closest,
   });
-  var fTime = performance ? performance.now() : new Date().getTime(),
-    duration = (fTime - sTime).toFixed(2);
 
-  if (path.length === 0) {
-    $("#message").text("couldn't find a path (" + duration + "ms)");
+  // cuando no encunetra una solución o destino
+  if (ruta.length === 0) {
     this.animateNoPath();
-    this.$cells.html(" "); //LIMPIAR CELDAS
+    this.$celdas.html(" ");
   } else {
-    $("#message").text("search took " + duration + "ms.");
-    this.drawDebugInfo();
-    this.animatePath(path);
+    // cuando sí lo encuentra
+    this.drawDebugInfo(); // dibuja los valores de la información de cada celda 
+    this.animatePath(ruta);
   }
 };
-GraphSearch.prototype.drawDebugInfo = function () {
-  this.$cells.html(" ");
-  var that = this;
-  if (this.opts.debug) {
-    that.$cells.each(function () {
-      var node = that.nodeFromElement($(this)),
-        debug = false;
-      if (node.visited) {
-        debug = "F: " + node.f + "<br />G: " + node.g + "<br />H: " + node.h;
-      }
 
+// para la función del despliegue de la información
+BusquedaGrafica.prototype.drawDebugInfo = function () {
+  this.$celdas.html(" ");
+  var that = this;
+  if (this.opciones.debug) {
+    that.$celdas.each(function () {
+      var nodo = that.nodeFromElement($(this)), debug = false;
+      if (nodo.visited) {
+        debug = "F: " + nodo.f + "<br />G: " + nodo.g + "<br />H: " + nodo.h;
+      }
       if (debug) {
         $(this).html(debug);
       }
     });
   }
 };
-GraphSearch.prototype.nodeFromElement = function ($cell) {
-  return this.graph.grid[parseInt($cell.attr("x"))][parseInt($cell.attr("y"))];
+
+// extrae el elemento nodo f
+BusquedaGrafica.prototype.nodeFromElement = function ($celda) {
+  return this.graph.grid[parseInt($celda.attr("x"))][parseInt($celda.attr("y"))];
 };
-GraphSearch.prototype.animateNoPath = function () {
-  var $graph = this.$graph;
+
+// cuando no enuentra la solución mueve la pantalla 
+BusquedaGrafica.prototype.animateNoPath = function () {
+  var $grafica = this.$grafica;
   var jiggle = function (lim, i) {
     if (i >= lim) {
-      $graph.css("top", 0).css("left", 0);
+      $grafica.css("top", 0).css("left", 0);
       return;
     }
     if (!i) i = 0;
     i++;
-    $graph.css("top", Math.random() * 6).css("left", Math.random() * 6);
+    $grafica.css("top", Math.random() * 6).css("left", Math.random() * 6);
     setTimeout(function () {
       jiggle(lim, i);
     }, 5);
   };
   jiggle(15);
 };
-//MODIFICAR PARA QUE LA ANIMACION AL TERMINAR SE MANTENGA EL INICIO.
-GraphSearch.prototype.animatePath = function (path) {
+//MODIFICAR PARA QUE LA ANIMACION AL TERMINAR SE MANTENGA EL INICIO, hace la animación del punto inicial al punto final de manera recursiva
+BusquedaGrafica.prototype.animatePath = function (ruta) {
   var grid = this.grid,
-    timeout = 1000 / grid.length, // no quitar la division
-    elementFromNode = function (node) {
-      return grid[node.x][node.y];
-    };
-  var self = this;
-  var addClass = function (path, i) {
-    if (i >= path.length - 1) {
+      elementFromNode = function (node) {
+        return grid[node.x][node.y];
+      };
+  var addClass = function (ruta, i) {
+    if (i >= ruta.length - 1) {
       return;
     }
-    elementFromNode(path[i]).addClass(css.active);
-    addClass(path, i + 1);
+    elementFromNode(ruta[i]).addClass(css.active);
+    addClass(ruta, i + 1);
   };
 
-  addClass(path, 0);
+  addClass(ruta, 0);
 };
